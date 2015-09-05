@@ -69,6 +69,14 @@ func Or(scanners ...Scanner) Scanner {
 	}
 }
 
+// Maybe runs scanner and returns true regardless of the output.
+func Maybe(scanner Scanner) Scanner {
+	return func(input []rune) ([]rune, bool) {
+		read, _ := scanner(input)
+		return read, true
+	}
+}
+
 // Any returns a scanner that accepts any number of occurrences of scanner,
 // including zero.
 func Any(scanner Scanner) Scanner {
@@ -99,10 +107,15 @@ func N(n int, scanner Scanner) Scanner {
 	}
 }
 
-// Maybe runs scanner and returns true regardless of the output.
-func Maybe(scanner Scanner) Scanner {
+// AtLeast returns a scanner that accepts scanner at least n times.
+func AtLeast(n int, scanner Scanner) Scanner {
 	return func(input []rune) ([]rune, bool) {
-		read, _ := scanner(input)
-		return read, true
+		scanners := make([]Scanner, n, n+1)
+		for i := range scanners {
+			scanners[i] = scanner
+		}
+
+		scanners = append(scanners, Any(scanner))
+		return And(scanners...)(input)
 	}
 }
