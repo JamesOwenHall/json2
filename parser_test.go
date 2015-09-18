@@ -3,8 +3,6 @@ package json2
 import (
 	"reflect"
 	"testing"
-
-	"github.com/JamesOwenHall/json2/scan"
 )
 
 func TestUnmarshal(t *testing.T) {
@@ -45,29 +43,29 @@ func TestUnmarshalError(t *testing.T) {
 	tests := []TestCase{
 		{``, &ParseError{Found: nil}},
 		{` `, &ParseError{Found: nil}},
-		{`nul`, &scan.TokenError{Found: "nul"}},
-		{`true false`, &ParseError{Found: &scan.Token{
-			Type:  scan.Boolean,
+		{`nul`, &TokenError{Found: "nul"}},
+		{`true false`, &ParseError{Found: &Token{
+			Type:  Boolean,
 			Value: false,
 		}}},
-		{`[,]`, &ParseError{Found: &scan.Token{
-			Type: scan.Comma,
+		{`[,]`, &ParseError{Found: &Token{
+			Type: Comma,
 		}}},
-		{`[12,]`, &ParseError{Found: &scan.Token{
-			Type: scan.RSquare,
+		{`[12,]`, &ParseError{Found: &Token{
+			Type: RSquare,
 		}}},
 		{`[12,13`, &ParseError{Found: nil}},
 		{`{`, &ParseError{Found: nil}},
-		{`{true:3}`, &ParseError{Found: &scan.Token{
-			Type:  scan.Boolean,
+		{`{true:3}`, &ParseError{Found: &Token{
+			Type:  Boolean,
 			Value: true,
 		}}},
-		{`{"key":"value", "foo" "value"}`, &ParseError{Found: &scan.Token{
-			Type:  scan.String,
+		{`{"key":"value", "foo" "value"}`, &ParseError{Found: &Token{
+			Type:  String,
 			Value: "value",
 		}}},
-		{`{"key":"value", "foo":}`, &ParseError{Found: &scan.Token{
-			Type: scan.RCurly,
+		{`{"key":"value", "foo":}`, &ParseError{Found: &Token{
+			Type: RCurly,
 		}}},
 	}
 

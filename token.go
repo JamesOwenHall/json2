@@ -1,4 +1,4 @@
-package scan
+package json2
 
 import (
 	"fmt"

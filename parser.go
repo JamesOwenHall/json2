@@ -2,13 +2,11 @@ package json2
 
 import (
 	"fmt"
-
-	"github.com/JamesOwenHall/json2/scan"
 )
 
 // ParseError represents the presence of an unexpected token.
 type ParseError struct {
-	Found *scan.Token
+	Found *Token
 }
 
 func (p *ParseError) Error() string {
@@ -21,7 +19,7 @@ func (p *ParseError) Error() string {
 
 // Unmarshal parses the JSON string.
 func Unmarshal(input string) (interface{}, error) {
-	tokenizer := scan.NewTokenizer(input)
+	tokenizer := NewTokenizer(input)
 	tokens, err := tokenizer.All()
 	if err != nil {
 		return nil, err
@@ -32,7 +30,7 @@ func Unmarshal(input string) (interface{}, error) {
 }
 
 type parser struct {
-	tokens []*scan.Token
+	tokens []*Token
 	pos    int
 }
 
@@ -55,15 +53,15 @@ func (p *parser) parseValue() (interface{}, *ParseError) {
 	}
 
 	switch tok := p.peek(); tok.Type {
-	case scan.Null:
+	case Null:
 		p.read()
 		return nil, nil
-	case scan.Boolean, scan.Number, scan.String:
+	case Boolean, Number, String:
 		p.read()
 		return tok.Value, nil
-	case scan.LSquare:
+	case LSquare:
 		return p.parseArray()
-	case scan.LCurly:
+	case LCurly:
 		return p.parseObject()
 	default:
 		return nil, &ParseError{Found: tok}
@@ -78,7 +76,7 @@ func (p *parser) parseArray() ([]interface{}, *ParseError) {
 
 	// Read first element.
 	tok := p.peek()
-	if tok != nil && tok.Type != scan.RSquare {
+	if tok != nil && tok.Type != RSquare {
 		v, err := p.parseValue()
 		if err != nil {
 			return nil, err
@@ -88,7 +86,7 @@ func (p *parser) parseArray() ([]interface{}, *ParseError) {
 
 	// Read the rest of the elements.
 	tok = p.peek()
-	for tok != nil && tok.Type == scan.Comma {
+	for tok != nil && tok.Type == Comma {
 		p.read()
 
 		v, err := p.parseValue()
@@ -102,7 +100,7 @@ func (p *parser) parseArray() ([]interface{}, *ParseError) {
 
 	// Read ']'.
 	tok = p.read()
-	if tok == nil || tok.Type != scan.RSquare {
+	if tok == nil || tok.Type != RSquare {
 		return nil, &ParseError{Found: tok}
 	}
 
@@ -117,7 +115,7 @@ func (p *parser) parseObject() (map[string]interface{}, *ParseError) {
 
 	// Read the first pair.
 	tok := p.peek()
-	if tok != nil && tok.Type != scan.RCurly {
+	if tok != nil && tok.Type != RCurly {
 		k, v, err := p.parsePair()
 		if err != nil {
 			return nil, err
@@ -127,7 +125,7 @@ func (p *parser) parseObject() (map[string]interface{}, *ParseError) {
 
 	// Read the rest of the pairs.
 	tok = p.peek()
-	for tok != nil && tok.Type == scan.Comma {
+	for tok != nil && tok.Type == Comma {
 		p.read()
 
 		k, v, err := p.parsePair()
@@ -141,7 +139,7 @@ func (p *parser) parseObject() (map[string]interface{}, *ParseError) {
 
 	// Read '}'.
 	tok = p.read()
-	if tok == nil || tok.Type != scan.RCurly {
+	if tok == nil || tok.Type != RCurly {
 		return nil, &ParseError{Found: tok}
 	}
 
@@ -151,14 +149,14 @@ func (p *parser) parseObject() (map[string]interface{}, *ParseError) {
 func (p *parser) parsePair() (string, interface{}, *ParseError) {
 	// Read key.
 	tok := p.read()
-	if tok == nil || tok.Type != scan.String {
+	if tok == nil || tok.Type != String {
 		return "", nil, &ParseError{Found: tok}
 	}
 	key := tok.Value.(string)
 
 	// Read colon.
 	tok = p.read()
-	if tok == nil || tok.Type != scan.Colon {
+	if tok == nil || tok.Type != Colon {
 		return "", nil, &ParseError{Found: tok}
 	}
 
@@ -171,7 +169,7 @@ func (p *parser) parsePair() (string, interface{}, *ParseError) {
 	return key, value, nil
 }
 
-func (p *parser) peek() *scan.Token {
+func (p *parser) peek() *Token {
 	if p.pos == len(p.tokens) {
 		return nil
 	}
@@ -179,7 +177,7 @@ func (p *parser) peek() *scan.Token {
 	return p.tokens[p.pos]
 }
 
-func (p *parser) read() *scan.Token {
+func (p *parser) read() *Token {
 	tok := p.peek()
 	if tok != nil {
 		p.pos++
