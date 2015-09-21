@@ -34,7 +34,7 @@ type parser struct {
 	pos    int
 }
 
-func (p *parser) parse() (interface{}, *ParseError) {
+func (p *parser) parse() (interface{}, error) {
 	v, err := p.parseValue()
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func (p *parser) parse() (interface{}, *ParseError) {
 	return v, nil
 }
 
-func (p *parser) parseValue() (interface{}, *ParseError) {
+func (p *parser) parseValue() (interface{}, error) {
 	if p.pos == len(p.tokens) {
 		return nil, &ParseError{Found: nil}
 	}
@@ -68,7 +68,7 @@ func (p *parser) parseValue() (interface{}, *ParseError) {
 	}
 }
 
-func (p *parser) parseArray() ([]interface{}, *ParseError) {
+func (p *parser) parseArray() ([]interface{}, error) {
 	var res []interface{}
 
 	// Read '['.
@@ -107,7 +107,7 @@ func (p *parser) parseArray() ([]interface{}, *ParseError) {
 	return res, nil
 }
 
-func (p *parser) parseObject() (map[string]interface{}, *ParseError) {
+func (p *parser) parseObject() (map[string]interface{}, error) {
 	res := make(map[string]interface{})
 
 	// Read '{'.
@@ -146,7 +146,7 @@ func (p *parser) parseObject() (map[string]interface{}, *ParseError) {
 	return res, nil
 }
 
-func (p *parser) parsePair() (string, interface{}, *ParseError) {
+func (p *parser) parsePair() (string, interface{}, error) {
 	// Read key.
 	tok := p.read()
 	if tok == nil || tok.Type != String {
